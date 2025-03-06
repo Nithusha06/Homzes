@@ -37,6 +37,11 @@ A Flutter mobile application for browsing real estate listings with Firebase int
    flutter run
    ```
 
+   
+  ## App Demo
+  https://1drv.ms/v/c/4db41685fa332cac/EVt4nYdGjr5FmtxkAGgI0qIBCEvEUiooQxasKIrZcrGvow?e=bWkxsZ
+
+
 Collections:
 - properties
   - title: String
