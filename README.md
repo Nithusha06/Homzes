@@ -1,16 +1,49 @@
 # homezs
 
-A new Flutter project.
+A Flutter mobile application for browsing real estate listings with Firebase integration.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Browse property listings with detailed information
+- View property images, locations, prices, and amenities
+- Search and filter properties
+- Smooth navigation and animations
+- Firebase backend integration
+- Image hosting with ImgBB CDN
 
-A few resources to get you started if this is your first Flutter project:
+## Setup
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Clone the repository
+2. Install Flutter dependencies:
+   ```bash
+   flutter pub get
+   ```
+3. Configure Firebase:
+   - Create a new Firebase project
+   - Add your Firebase configuration files
+   - Enable Firestore Database
+   - Set up Firebase Storage for images
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+4. Configure ImgBB:
+   - Sign up at [ImgBB](https://imgbb.com/)
+   - Get your API key from dashboard
+   - Add to your environment variables or config file:
+     ```
+     IMGBB_API_KEY=your_api_key_here
+     ```
+
+5. Run the app:
+   ```bash
+   flutter run
+   ```
+
+Collections:
+- properties
+  - title: String
+  - imageUrl: String (ImgBB URL)
+  - location: String
+  - price: Number
+  - beds: Number
+  - bathrooms: Number
+
+

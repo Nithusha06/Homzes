@@ -10,9 +10,10 @@ class SearchCatalogScreen2 extends StatefulWidget {
 class _SearchCatalogScreen2State extends State<SearchCatalogScreen2> with SingleTickerProviderStateMixin {
   final FirebaseService _firebaseService = FirebaseService();
   late AnimationController _animationController;
-  late Animation<Offset> _slideAnimation;
   List<Property> properties = [];
+  List<Property> filteredProperties = [];
   Set<String> favorites = {};
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -22,17 +23,21 @@ class _SearchCatalogScreen2State extends State<SearchCatalogScreen2> with Single
       duration: Duration(milliseconds: 1000),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(1.5, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _searchController.addListener(_filterProperties);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
       _loadProperties();
+    });
+  }
+
+  void _filterProperties() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredProperties = properties.where((property) {
+        return property.title.toLowerCase().contains(query) ||
+               property.price.toString().contains(query);
+      }).toList();
     });
   }
 
@@ -41,6 +46,7 @@ class _SearchCatalogScreen2State extends State<SearchCatalogScreen2> with Single
       final loadedProperties = await _firebaseService.getProperties();
       setState(() {
         properties = loadedProperties;
+        filteredProperties = loadedProperties;
       });
     } catch (e) {
       print('Error loading properties: $e');
@@ -114,12 +120,18 @@ class _SearchCatalogScreen2State extends State<SearchCatalogScreen2> with Single
                             size: 26,
                           ),
                           SizedBox(width: 12),
-                          Text(
-                            'Search',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 17,
-                              fontWeight: FontWeight.w400,
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search...',
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -132,37 +144,40 @@ class _SearchCatalogScreen2State extends State<SearchCatalogScreen2> with Single
           ),
         ),
       ),
-      body: properties.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: properties.length,
-              itemBuilder: (context, index) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: Offset(1.5, 0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _animationController,
-                    curve: Interval(
-                      index * 0.2,
-                      1.0,
-                      curve: Curves.easeOutCubic,
-                    ),
-                  )),
-                  child: PropertyListCard(
-                    property: properties[index],
-                    isFavorite: favorites.contains(properties[index].title),
-                    onFavoritePressed: () => _toggleFavorite(properties[index].title),
-                  ),
-                );
-              },
-            ),
+      body: filteredProperties.isEmpty && properties.isNotEmpty
+          ? Center(child: Text('No matching properties'))
+          : properties.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  padding: EdgeInsets.all(16),
+                  itemCount: filteredProperties.length,
+                  itemBuilder: (context, index) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: Offset(1.5, 0),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: _animationController,
+                        curve: Interval(
+                          index * 0.2,
+                          1.0,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      )),
+                      child: PropertyListCard(
+                        property: filteredProperties[index],
+                        isFavorite: favorites.contains(filteredProperties[index].title),
+                        onFavoritePressed: () => _toggleFavorite(filteredProperties[index].title),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
     _animationController.dispose();
     super.dispose();
   }
